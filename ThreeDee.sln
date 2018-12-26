@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeDee", "ThreeDee\ThreeDee.csproj", "{FBE05508-345C-4141-9E06-2785F9B56825}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{30E0865D-D0AA-4440-AB92-502D035C0575}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git items", "git items", "{30E0865D-D0AA-4440-AB92-502D035C0575}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
