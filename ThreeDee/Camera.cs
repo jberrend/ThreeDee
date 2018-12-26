@@ -117,8 +117,6 @@ namespace ThreeDee
                 pitch = -90;
             }
 
-            Console.WriteLine(pitch + ", " + yaw);
-
             //UpdateVectors();
             
             // z axis points "backwards" in a RH coord system, negate to point forwards.
