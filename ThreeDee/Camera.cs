@@ -14,6 +14,8 @@ namespace ThreeDee
         public Matrix projection { get; protected set; }
         public Vector3 cameraPosition { get; protected set; }
 
+        private static readonly Vector3 defaultDirection = -Vector3.UnitZ;
+
         private int fov = 70;
         private float pitch = 0;
         private float yaw = 0;
@@ -26,22 +28,27 @@ namespace ThreeDee
         //defines speed of camera movement
         private float movementSpeed = 0.25F;
 
-        // higher = SLOWER - reduce to increase speed
-        private float camRotSensitivity = -0.005f;
+        // higher = faster movement
+        private float camRotSensitivity = 0.01f;
+
+        private float nearPlaneDist = 1;
+        private float farPlaneDist = 100;
 
         public Camera(Game game, Vector3 pos, Vector3 target, Vector3 up)
             : base(game)
         {
             // TODO: Construct any child components here
 
-            // Build camera view matrix
+            // prepare camera view vectors
             cameraPosition = pos;
             cameraDirection = target - pos;
             cameraDirection.Normalize();
             cameraUp = up;
-            //UpdateVectors();
+
+            // create the initial view matrix
             CreateLookAt();
-            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(fov), Game.Window.ClientBounds.Width / (float)Game.Window.ClientBounds.Height, 1, 100);
+            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(fov), 
+                Game.Window.ClientBounds.Width / (float)Game.Window.ClientBounds.Height, nearPlaneDist, farPlaneDist);
         }
         
         private void CenterMouse()
@@ -90,8 +97,8 @@ namespace ThreeDee
 
             // Rotation in the world
             int elapsedMillis = gameTime.ElapsedGameTime.Milliseconds;
-            float mDeltaX = currState.X - mouseCenter.X;
-            float mDeltaY = currState.Y - mouseCenter.Y;
+            float mDeltaX = mouseCenter.X - currState.X;
+            float mDeltaY = mouseCenter.Y - currState.Y;
             mDeltaX *= camRotSensitivity * elapsedMillis;
             mDeltaY *= camRotSensitivity * elapsedMillis;
 
@@ -102,26 +109,27 @@ namespace ThreeDee
             yaw += mDeltaX;
 
             // bind pitch and yaw
-
             // loop around to prevent potential over(under) flow issues.
             yaw %= 360;
 
             // can't look any further that straight up or down
-            if (pitch >= 90f)
-            {
-                pitch = 90f;
-            }
+            // being exactly 90 causes camera to flip
+            const float maxPitch = 89.9f;
+            const float minPitch = -maxPitch;
 
-            if (pitch <= -90)
-            {
-                pitch = -90;
-            }
+            if (pitch >= maxPitch)
+                pitch = maxPitch;
+
+            if (pitch <= minPitch)
+                pitch = minPitch;
 
             //UpdateVectors();
             
             // z axis points "backwards" in a RH coord system, negate to point forwards.
             // (if we don't negate, the other axes are reversed)
-            cameraDirection = Vector3.Transform(-Vector3.UnitZ, Matrix.CreateRotationX(MathHelper.ToRadians(pitch)) * Matrix.CreateRotationY(MathHelper.ToRadians(yaw)));
+            cameraDirection = Vector3.Transform(defaultDirection,
+                Matrix.CreateRotationX(MathHelper.ToRadians(pitch)) * 
+                Matrix.CreateRotationY(MathHelper.ToRadians(yaw)));
 
 
             //cameraDirection = Vector3.Transform(
@@ -136,8 +144,7 @@ namespace ThreeDee
             // Reset prevMouseState
             CenterMouse();
 
-            //UpdateVectors();
-
+            // update the view matrix based on potential movement changes
             CreateLookAt();
 
             base.Update(gameTime);

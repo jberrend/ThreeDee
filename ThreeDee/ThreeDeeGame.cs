@@ -7,34 +7,19 @@ namespace ThreeDee
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class ThreeDeeGame : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        // Models in use for the game - eventually moved elsewhere.
         Model cube;
-
-        Model grass;
-
-        Texture2D character;
+        Model gaia;
+        Model smallCube;
 
         Camera camera;
-
-        float rotation = 0;
-        float zPos = 0;
-        float xPos = 0;
-        float scale = 1;
-        float rotationSpeed = 1f / 50f;
-        float camZ = 5f;
-        float camXRot = 0;
-        Point mousePosition;
-        Point originalMousePosition;
-
-        float camYRot = 0;
-
-        float mouseX, mouseY;
         
-        public Game1()
+        public ThreeDeeGame()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1920;
@@ -54,7 +39,6 @@ namespace ThreeDee
             graphics.IsFullScreen = true;
             IsMouseVisible = false;
             Mouse.SetPosition(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-            originalMousePosition = Mouse.GetState().Position;
 
             var cameraPosition = new Vector3(0, 2, 5); //  up 2 units and back 5
             var cameraLookAtVector = cameraPosition + new Vector3(0, 0, -100);
@@ -77,9 +61,9 @@ namespace ThreeDee
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            cube = Content.Load<Model>("MonoCube");
-            grass = Content.Load<Model>("SmallCube");
-            character = Content.Load<Texture2D>("Character");
+            cube  = Content.Load<Model>("MonoCube");
+            smallCube = Content.Load<Model>("SmallCube");
+            gaia  = Content.Load<Model>("GaiaCube");
         }
 
         /// <summary>
@@ -103,12 +87,12 @@ namespace ThreeDee
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
             {
-                xPos +=.1f;
+                // TODO
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
             {
-                xPos -=.1f;
+                // TODO
             }
 
             //var newMouseState = Mouse.GetState();
@@ -151,8 +135,9 @@ namespace ThreeDee
             // TODO: Add your drawing code here
 
             //DrawModel(new Vector3(-4, 0, 0));
-            DrawModel(grass, new Vector3(0, 0, 0));
-            DrawModel(cube, new Vector3(xPos, 0, 0));
+            DrawModel(smallCube, new Vector3(0, 0, 0));
+            DrawModel(cube, new Vector3(5, 0, 0));
+            DrawModel(gaia, new Vector3(-5, 0, 0));
 
             base.Draw(gameTime);
         }
@@ -165,6 +150,7 @@ namespace ThreeDee
                 {
                     effect.EnableDefaultLighting();
 
+                    // TODO: eventually update to a better lighting system.
                     //effect.LightingEnabled = true;
                     //effect.DirectionalLight0.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
                     //effect.DirectionalLight0.Direction = new Vector3(0, 0, -1);  // coming along the x-axis
@@ -173,19 +159,8 @@ namespace ThreeDee
 
                     effect.Alpha = 1; // THIS LINE IS 100% NEEDED!!!!!!
 
-                    //effect.View = Matrix.CreateLookAt(cameraPosition, cameraLookAtVector, cameraUpVector)
-                    //    * Matrix.CreateRotationY(MathHelper.ToRadians(camXRot))
-                    //    * Matrix.CreateRotationX(MathHelper.ToRadians(camYRot));
-
                     effect.View = camera.view;
-
-                    float aspectRatio =
-                        graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight;
-                    float fieldOfView = MathHelper.PiOver4;
-                    float nearClipPlane = 1;
-                    float farClipPlane = 200;
-                    effect.Projection = Matrix.CreatePerspectiveFieldOfView(
-                        fieldOfView, aspectRatio, nearClipPlane, farClipPlane);
+                    effect.Projection = camera.projection;
                 }
                 // Now that we've assigned our properties on the effects we can
                 // draw the entire mesh
